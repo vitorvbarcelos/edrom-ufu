@@ -22,7 +22,15 @@
 
   /* ---------- utilitários de UI ---------- */
 
-  const scrollBottom = () => { messagesEl.scrollTop = messagesEl.scrollHeight; };
+  const scrollBottom = () => {
+    // rola pro fim sempre (2 frames pra pegar a altura já renderizada)
+    requestAnimationFrame(() => {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+    });
+  };
+  // garante o auto-scroll a cada mudança (mensagem, "digitando", opções)
+  new MutationObserver(scrollBottom).observe(messagesEl, { childList: true, subtree: true });
 
   function addUserMsg(text) {
     const el = document.createElement('div');

@@ -3,8 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contato & Instagram — EDROM</title>
-  <meta name="description" content="Fale com a EDROM: e-mail, endereço no Campus Santa Mônica da UFU e nossas redes sociais. Acompanhe o dia a dia no Instagram @edromufu.">
+  <title>Contato — EDROM</title>
+  <meta name="description" content="Fale com a EDROM: e-mail, endereço no Campus Santa Mônica da UFU e nossas redes sociais.">
+  <meta property="og:title" content="Contato — EDROM">
+  <meta property="og:image" content="https://edrom-ufu.vercel.app/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EDROM — UFU">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://edrom-ufu.vercel.app/assets/og-image.png">
+  <meta name="theme-color" content="#100F24">
   <link rel="icon" type="image/png" href="assets/marca/simbolo-edrom.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,39 +71,15 @@
       </div>
     </section>
 
-    <!-- ===================== INSTAGRAM ===================== -->
-    <section class="section" id="instagram">
-      <div class="container">
-        <div class="insta-head reveal">
-          <div class="insta-avatar"><img src="assets/marca/simbolo-edrom.png" alt="EDROM no Instagram"></div>
-          <div class="insta-meta">
-            <h3>@edromufu</h3>
-            <a href="https://www.instagram.com/edromufu/" target="_blank" rel="noopener">Siga a EDROM no Instagram →</a>
-          </div>
-          <a href="https://www.instagram.com/edromufu/" target="_blank" rel="noopener" class="btn btn-primary btn-small" data-magnetic style="margin-left:auto">Seguir</a>
-        </div>
-
-        <div class="insta-grid" id="instaGrid">
-          <!-- teasers que levam ao perfil (o feed real fica no Instagram) -->
-        </div>
-
-        <div class="insta-cta reveal">
-          <a href="https://www.instagram.com/edromufu/" target="_blank" rel="noopener" class="btn btn-ghost" data-magnetic>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-            Ver todas as postagens
-          </a>
-        </div>
-      </div>
-    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="js/supabase.js"></script>
   <script src="js/data.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/main.js"></script>
   <script src="js/chat.js"></script>
-  <script src="js/instagram.js"></script>
 </body>
 </html>

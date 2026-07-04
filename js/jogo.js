@@ -78,6 +78,14 @@
   let lastTime = 0, clock = 0;
   let pointer = { x: LW / 2, y: LH * 0.7, over: false };
 
+  const GOALS_PER_LEVEL = 3;   // 3 gols para subir de nível
+  let goalsThisLevel = 0;
+  const SHOT_LIMIT = 5;        // 5s pra chutar depois de mirar; senão chuta sozinho
+  let shotTimer = 0;
+
+  // botão de boost DESENHADO no canvas (sem botão externo)
+  const boostBtn = { x: 0, y: 0, r: 0 };
+
   // boost "bola pegando fogo": 3 por partida, deixa o chute MUITO rápido
   const BOOST_MAX = 3;
   let boostsLeft = BOOST_MAX, boostArmed = false, ballOnFire = false;
@@ -92,7 +100,7 @@
   /* ---------- ciclo ---------- */
   function startGame() {
     recorde = (EdromData.getRanking()[0] || {}).score || 0;
-    score = 0; level = 1;
+    score = 0; level = 1; goalsThisLevel = 0;
     boostsLeft = BOOST_MAX; boostArmed = false; ballOnFire = false;
     ovStart.classList.add('is-hidden');
     ovOver.classList.add('is-hidden');
@@ -107,6 +115,7 @@
     aimDir = 1;
     aimSpeed = (LW * 0.55) * (1 + level * 0.06);
     ballOnFire = false;
+    shotTimer = SHOT_LIMIT; // reinicia o cronômetro de 5s a cada chute
     // goleiro começa numa posição/fase ALEATÓRIA a cada chute
     keeperPhase = Math.random() * Math.PI * 2;
     const { min, max } = keeperRange();
@@ -137,7 +146,8 @@
     const saved = Math.abs(ball.toX - keeperX) < (keeperW / 2 + BALL_R);
     if (saved) startSave();
     else {
-      score++; level++; flash = 1;
+      score++; goalsThisLevel++; flash = 1;
+      if (goalsThisLevel >= GOALS_PER_LEVEL) { level++; goalsThisLevel = 0; } // 3 gols = +1 nível
       if (score > recorde) recorde = score;
       updateHud();
       beginAim();
@@ -170,19 +180,12 @@
     hudNivel.textContent = level;
     hudGols.textContent = score;
     hudRecorde.textContent = Math.max(recorde, (EdromData.getRanking()[0] || {}).score || 0);
-    const bb = document.getElementById('btnBoost');
-    if (bb) {
-      bb.textContent = boostsLeft > 0 ? `🔥 Boost (${boostsLeft})` : 'Sem boost';
-      bb.disabled = boostsLeft <= 0;
-      bb.classList.toggle('armed', boostArmed);
-    }
   }
 
   function toggleBoost() {
     if (boostsLeft <= 0) return;
     if (state !== 'aim' && state !== 'power') return;
     boostArmed = !boostArmed;
-    updateHud();
   }
 
   /* ---------- entrada ---------- */
@@ -194,6 +197,11 @@
     e.preventDefault();
     const p = toLogical(e.clientX, e.clientY);
     pointer.x = p.x; pointer.y = p.y; pointer.over = true;
+    // clique no botão de boost desenhado no canvas?
+    if (isPlaying() && Math.hypot(p.x - boostBtn.x, p.y - boostBtn.y) <= boostBtn.r) {
+      toggleBoost();
+      return;
+    }
     action();
   });
   const isPlaying = () => state !== 'start' && state !== 'over';
@@ -210,7 +218,6 @@
   });
 
   document.getElementById('btnKick').addEventListener('click', action);
-  document.getElementById('btnBoost').addEventListener('click', toggleBoost);
   window.addEventListener('keydown', (e) => {
     if (document.body.dataset.page !== 'jogo') return;
     if (e.code === 'Space' && (state === 'aim' || state === 'power')) { e.preventDefault(); action(); }
@@ -261,9 +268,10 @@
     updateHud();
   }
 
-  /* ---------- ranking ---------- */
-  function renderRanking(meNome, meScore) {
-    const list = EdromData.getRanking();
+  /* ---------- ranking (GLOBAL via Supabase, fallback local) ---------- */
+  async function renderRanking(meNome, meScore) {
+    const list = await EdromData.getRankingGlobal();
+    if (list[0]) { recorde = Math.max(recorde, list[0].score); updateHud(); }
     if (!list.length) {
       rankingList.innerHTML = '<div class="ranking-empty">Ninguém no ranking ainda.<br>Seja o primeiro a marcar!</div>';
       return;
@@ -292,6 +300,16 @@
       keeperX = (min + max) / 2 + Math.sin(keeperPhase) * (max - min) / 2;
     }
     keeperGrab = Math.max(0, keeperGrab - dt * 2);
+
+    // cronômetro de 5s: mira/força correndo. Se zerar, chuta sozinho.
+    if (state === 'aim' || state === 'power') {
+      shotTimer -= dt;
+      if (shotTimer <= 0) {
+        shotTimer = 0;
+        if (state === 'aim') { beginPower(); shoot(); }
+        else shoot();
+      }
+    }
 
     if (state === 'aim') {
       aimX += aimDir * aimSpeed * dt;
@@ -339,8 +357,10 @@
     drawKeeper();
     drawLevelBar();
     drawAim();
+    drawShotTimer();
     drawBall();
     drawPower();
+    drawBoostButton();
     drawGoalFlash();
     drawReticle();
 
@@ -396,25 +416,80 @@
     }
   }
 
-  // barra lateral de nível (esquerda) — muda de cor conforme sobe
+  // barra lateral de nível (esquerda): mostra o progresso de gols (3 = sobe de nível)
   function drawLevelBar() {
-    const segs = 10, bx = 16, bw = 14, gap = 4;
-    const bh = LH * 0.5, by = LH * 0.28, segH = (bh - gap * (segs - 1)) / segs;
-    const filled = ((level - 1) % segs) + 1; // 1..10 ciclando
+    const segs = GOALS_PER_LEVEL, bx = 16, bw = 16, gap = 6;
+    const bh = LH * 0.42, by = LH * 0.30, segH = (bh - gap * (segs - 1)) / segs;
     ctx.save();
-    ctx.font = '700 11px "Space Grotesk", sans-serif'; ctx.textAlign = 'center';
+    ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.fillText('NÍVEL', bx + bw / 2, by - 12);
+    ctx.font = '700 11px "Space Grotesk", sans-serif';
+    ctx.fillText('NÍVEL', bx + bw / 2, by - 30);
     ctx.fillStyle = themeColor(0.65);
-    ctx.font = '700 16px "Space Grotesk", sans-serif';
-    ctx.fillText(String(level), bx + bw / 2, by - 26);
+    ctx.font = '700 22px "Space Grotesk", sans-serif';
+    ctx.fillText(String(level), bx + bw / 2, by - 8);
     for (let i = 0; i < segs; i++) {
       const yy = by + bh - (i + 1) * segH - i * gap;
-      const on = i < filled;
+      const on = i < goalsThisLevel;
       ctx.fillStyle = on ? themeColor(0.6) : 'rgba(255,255,255,0.12)';
-      roundRect(bx, yy, bw, segH, 3); ctx.fill();
-      if (on) { ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1; ctx.stroke(); }
+      roundRect(bx, yy, bw, segH, 4); ctx.fill();
+      if (on) { ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1.5; ctx.stroke(); }
     }
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = '700 9px "Space Grotesk", sans-serif';
+    ctx.fillText(goalsThisLevel + '/' + GOALS_PER_LEVEL, bx + bw / 2, by + bh + 16);
+    ctx.restore();
+  }
+
+  // botão de BOOST desenhado no canvas (ícone de chama em SVG/Path2D, sem emoji)
+  const FLAME = new Path2D('M12 2c1 3 4 4 4 8a4 4 0 0 1-8 0c0-1 .3-2 1-3 .2 1 .8 1.6 1.5 1.8C10 7 10 4 12 2Z');
+  function drawBoostButton() {
+    if (!isPlaying()) return;
+    boostBtn.r = 30; boostBtn.x = LW - 52; boostBtn.y = LH - 52;
+    const on = boostsLeft > 0;
+    const armed = boostArmed;
+    ctx.save();
+    // fundo do botão
+    ctx.beginPath(); ctx.arc(boostBtn.x, boostBtn.y, boostBtn.r, 0, Math.PI * 2);
+    if (armed) { ctx.fillStyle = 'rgba(255,90,20,0.95)'; }
+    else if (on) { ctx.fillStyle = 'rgba(20,15,30,0.75)'; }
+    else { ctx.fillStyle = 'rgba(20,15,30,0.5)'; }
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = armed ? '#fff' : (on ? 'rgba(255,120,40,0.9)' : 'rgba(255,255,255,0.2)');
+    ctx.stroke();
+    if (armed) { // brilho pulsante quando armado
+      ctx.strokeStyle = `rgba(255,210,63,${0.5 + 0.5 * Math.sin(clock * 8)})`;
+      ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(boostBtn.x, boostBtn.y, boostBtn.r + 4, 0, Math.PI * 2); ctx.stroke();
+    }
+    // ícone de chama (Path2D 24x24 centrado e escalado)
+    ctx.save();
+    ctx.translate(boostBtn.x - 15, boostBtn.y - 18); ctx.scale(1.25, 1.25);
+    ctx.fillStyle = on ? '#FFD23F' : 'rgba(255,255,255,0.3)';
+    ctx.fill(FLAME);
+    ctx.restore();
+    // pips de quantos boosts restam
+    for (let i = 0; i < BOOST_MAX; i++) {
+      ctx.beginPath();
+      ctx.arc(boostBtn.x - 14 + i * 14, boostBtn.y + 20, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = i < boostsLeft ? '#FFD23F' : 'rgba(255,255,255,0.2)';
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // cronômetro de 5s (anel ao redor da bola durante mira/força)
+  function drawShotTimer() {
+    if (state !== 'aim' && state !== 'power') return;
+    const frac = Math.max(0, shotTimer / SHOT_LIMIT);
+    const cx = BALL_HOME.x, cy = BALL_HOME.y, r = BALL_R + 12;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 4; ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2);
+    ctx.strokeStyle = frac < 0.3 ? '#ff5a5a' : themeColor(0.6);
+    ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.stroke();
     ctx.restore();
   }
 

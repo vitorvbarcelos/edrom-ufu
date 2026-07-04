@@ -406,16 +406,24 @@ main, .site-footer { position: relative; z-index: 1; }
 }
 
 @media (max-width: 900px) {
-  .hero { height: auto; min-height: 100svh; padding-top: 96px; padding-bottom: 40px; }
-  .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 24px; }
+  .hero { height: auto; min-height: 100svh; padding-top: 92px; padding-bottom: 36px; }
+  .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 18px; }
   .hero-tagline { margin-inline: auto; }
   .hero-ctas { justify-content: center; }
   .hero-proof { justify-content: center; }
-  .hero-visual { order: -1; min-height: 210px; }
-  .hero-symbol { width: min(190px, 48vw); }
-  .hero-halo { width: 260px; }
-  .hero-ring { width: 300px; }
-  .hero-kicker { font-size: 1.1rem; }
+  .hero-visual { order: -1; min-height: 180px; }
+  .hero-symbol { width: min(160px, 42vw); filter: drop-shadow(0 0 24px rgba(255,210,63,0.28)); }
+  /* no celular o anel/halo vazavam a margem — some com eles, fica só o símbolo */
+  .hero-halo, .hero-ring { display: none; }
+  .hero-kicker { font-size: 1rem; letter-spacing: 0.28em; }
+}
+@media (max-width: 480px) {
+  .hero-symbol { width: min(130px, 38vw); }
+  .hero-visual { min-height: 150px; }
+  .hero-proof { font-size: 7px; gap: 8px; }
+  /* CTAs empilhados no celular pra nenhum botão cortar */
+  .hero-ctas { flex-direction: column; align-items: center; width: 100%; }
+  .hero-ctas .btn { width: 100%; max-width: 320px; justify-content: center; }
 }
 
 /* ---------- sobre + stats ---------- */

@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jogo do Robô — EDROM</title>
   <meta name="description" content="Marque gols contra o robô goleiro da EDROM. A cada gol o goleiro fica mais rápido. Entre no ranking!">
+  <meta property="og:title" content="Jogo do Robô — EDROM">
+  <meta property="og:image" content="https://edrom-ufu.vercel.app/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EDROM — UFU">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://edrom-ufu.vercel.app/assets/og-image.png">
+  <meta name="theme-color" content="#100F24">
   <link rel="icon" type="image/png" href="assets/marca/simbolo-edrom.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,7 +48,7 @@
               <div class="jogo-overlay" id="ovStart">
                 <img class="robo" src="assets/chat-robo.png" alt="Robô EDROM">
                 <h3>Jogo do Robô</h3>
-                <p>Trave a <strong>mira</strong>, trave a <strong>força</strong> e chute. O goleiro robô fica mais rápido a cada gol!</p>
+                <p>Trave a <strong>mira</strong>, trave a <strong>força</strong> e chute — você tem <strong>5s</strong>! A cada <strong>3 gols</strong> sobe de nível. Toque no <strong>botão de fogo</strong> pra dar boost (3 por partida).</p>
                 <button class="btn btn-primary" id="btnStart" data-magnetic>Carregar e jogar</button>
                 <span class="jogo-hint">Clique no campo ou aperte ESPAÇO</span>
               </div>
@@ -60,7 +69,6 @@
 
             <div class="jogo-controls">
               <button class="btn btn-primary" id="btnKick" data-magnetic>Mirar / Chutar</button>
-              <button class="btn btn-boost" id="btnBoost" data-magnetic>🔥 Boost (3)</button>
               <button class="btn btn-ghost" id="btnRestart2" data-magnetic>Reiniciar</button>
               <button class="btn btn-ghost" id="btnFull" data-magnetic>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
@@ -86,6 +94,7 @@
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="js/supabase.js"></script>
   <script src="js/data.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/main.js"></script>

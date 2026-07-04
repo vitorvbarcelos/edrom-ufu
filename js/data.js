@@ -113,6 +113,12 @@ const EdromData = (() => {
     const leads = getLeads();
     leads.push({ ...lead, data: new Date().toISOString() });
     write('edrom_leads', leads);
+    // também salva no Supabase (central pra equipe) — fire-and-forget
+    if (window.EdromSB) window.EdromSB.insert('leads', {
+      tipo: lead.tipo || null, nome: lead.nome || null, empresa: lead.empresa || null,
+      email: lead.email || null, telefone: lead.telefone || null, apoio: lead.apoio || null,
+      curso: lead.curso || null, periodo: lead.periodo || null, area: lead.area || null,
+    });
   }
   const setLeads = (l) => write('edrom_leads', l);
 
@@ -136,6 +142,12 @@ const EdromData = (() => {
     };
     lista.push(inscricao);
     setInscricoes(lista);
+    // também salva no Supabase (central) — fire-and-forget
+    if (window.EdromSB) window.EdromSB.insert('inscricoes', {
+      codigo, nome: dados.nome || null, email: dados.email || null, telefone: dados.telefone || null,
+      curso: dados.curso || null, periodo: dados.periodo || null, area: dados.area || null,
+      portfolio: dados.portfolio || null, seletivo: seletivo.titulo || null,
+    });
     return inscricao;
   }
 
@@ -202,9 +214,27 @@ const EdromData = (() => {
     }
 
     lista.sort((a, b) => b.score - a.score);
-    setRanking(lista.slice(0, 100)); // guarda top 100
+    setRanking(lista.slice(0, 100)); // guarda top 100 (local/fallback)
     const posicao = getRanking().findIndex(e => normalizar(e.nome) === chave) + 1;
+    // ranking GLOBAL: envia pro Supabase (todo mundo vê) — só se melhorou
+    if (melhorou && window.EdromSB) window.EdromSB.insert('ranking', { nome: limpo, score: pts });
     return { ok: true, posicao, melhorou, recordeAnterior };
+  }
+
+  // Ranking GLOBAL (Supabase). Deduplica por nome mantendo o maior. Fallback local.
+  async function getRankingGlobal() {
+    if (window.EdromSB) {
+      const rows = await window.EdromSB.select('ranking', 'select=nome,score&order=score.desc&limit=300');
+      if (rows && Array.isArray(rows)) {
+        const best = {};
+        rows.forEach(r => {
+          const k = normalizar(r.nome || '');
+          if (!best[k] || r.score > best[k].score) best[k] = { nome: r.nome, score: r.score };
+        });
+        return Object.values(best).sort((a, b) => b.score - a.score).slice(0, 100);
+      }
+    }
+    return getRanking(); // offline / tabela ainda não criada
   }
 
   /* ---------- Instagram ---------- */
@@ -240,7 +270,7 @@ const EdromData = (() => {
     getSeletivo, setSeletivo,
     getLeads, addLead, setLeads,
     getInscricoes, setInscricoes, addInscricao, findInscricao,
-    getRanking, setRanking, addScore,
+    getRanking, setRanking, addScore, getRankingGlobal,
     getPalavroes, setPalavroes, nomePermitido,
     getInstaPosts, setInstaPosts, getInstaWidget, setInstaWidget,
     exportBackup, importBackup,

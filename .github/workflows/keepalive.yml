@@ -1,0 +1,23 @@
+name: Supabase Keep-Alive
+
+# Mantém o projeto Supabase (plano free) ativo: o Supabase pausa projetos
+# sem atividade por ~7 dias. Este workflow faz um ping leve todo dia.
+# A chave usada é a ANON (pública) — segura de ficar aqui.
+
+on:
+  schedule:
+    - cron: '17 6 * * *'   # todo dia 06:17 UTC
+  workflow_dispatch:        # permite rodar manualmente também
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://rktknlxzjixczfuhysss.supabase.co/rest/v1/ranking?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrdGtubHh6aml4Y3pmdWh5c3NzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNTQ3MTgsImV4cCI6MjA5ODczMDcxOH0.dQmuRX9YPVDZFxyDH-ttCt6w1hb40jUKcBdBHeC6HNM")
+          echo "HTTP $CODE"
+          # 200 (tabela criada) ou 401/404 (ainda respondeu = projeto acordado) são OK
+          if [ "$CODE" = "000" ]; then echo "sem resposta"; exit 1; fi
