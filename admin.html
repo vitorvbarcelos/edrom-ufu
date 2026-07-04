@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — EDROM</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/marca/simbolo-edrom.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Press+Start+2P&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+  <!-- ===================== LOGIN ===================== -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-card">
+      <img src="assets/marca/simbolo-edrom.png" alt="EDROM">
+      <h1>Painel EDROM</h1>
+      <p>Área restrita da equipe</p>
+      <form id="loginForm">
+        <div class="form-field">
+          <label for="loginUser">Usuário</label>
+          <input type="text" id="loginUser" autocomplete="username">
+        </div>
+        <div class="form-field">
+          <label for="loginPass">Senha</label>
+          <input type="password" id="loginPass" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary form-submit">Entrar</button>
+        <p class="login-error" id="loginError">Usuário ou senha incorretos.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== PAINEL ===================== -->
+  <div class="admin-shell" id="adminShell">
+    <div class="admin-topbar">
+      <img src="assets/marca/edrom-horizontal.png" alt="EDROM">
+      <div class="right">
+        <button class="mini-btn" id="btnExportBackup">Exportar backup</button>
+        <button class="mini-btn" id="btnImportBackup">Importar backup</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+        <a class="mini-btn" href="index.html" target="_blank" rel="noopener">Ver site</a>
+        <button class="mini-btn danger" id="btnLogout">Sair</button>
+      </div>
+    </div>
+
+    <main class="admin-main">
+      <nav class="admin-tabs" role="tablist">
+        <button class="admin-tab is-active" data-tab="leads">Leads</button>
+        <button class="admin-tab" data-tab="inscricoes">Inscrições</button>
+        <button class="admin-tab" data-tab="seletivo">Processo Seletivo</button>
+        <button class="admin-tab" data-tab="equipe">Equipe</button>
+        <button class="admin-tab" data-tab="ranking">Ranking / Jogo</button>
+        <button class="admin-tab" data-tab="conteudo">Conteúdo</button>
+      </nav>
+
+      <!-- ----- ABA LEADS ----- -->
+      <section class="admin-panel is-active" id="panel-leads">
+        <div class="panel-head">
+          <h2>Leads do chat</h2>
+          <div class="actions">
+            <button class="btn btn-primary btn-small" id="btnExportCsv">Exportar CSV</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <input type="search" id="leadsSearch" placeholder="Buscar por nome, e-mail, empresa...">
+          <select id="leadsFilter">
+            <option value="">Todos os tipos</option>
+            <option value="patrocinio">Patrocínio</option>
+            <option value="membro">Membro</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table" id="leadsTable">
+            <thead>
+              <tr>
+                <th>Tipo</th><th>Nome</th><th>Contato</th><th>Detalhes</th><th>Data</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="empty-note" id="leadsEmpty" hidden>Nenhum lead ainda. Eles chegam pelo chat do site.</div>
+        </div>
+      </section>
+
+      <!-- ----- ABA INSCRIÇÕES ----- -->
+      <section class="admin-panel" id="panel-inscricoes">
+        <div class="panel-head">
+          <h2>Inscrições do seletivo</h2>
+        </div>
+        <div class="filter-row">
+          <input type="search" id="insSearch" placeholder="Buscar por nome, código, e-mail...">
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table" id="insTable">
+            <thead>
+              <tr>
+                <th>Código</th><th>Candidato</th><th>Área</th><th>Etapa</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="empty-note" id="insEmpty" hidden>Nenhuma inscrição ainda.</div>
+        </div>
+      </section>
+
+      <!-- ----- ABA SELETIVO ----- -->
+      <section class="admin-panel" id="panel-seletivo">
+        <div class="panel-head">
+          <h2>Processo Seletivo</h2>
+          <div class="actions">
+            <span class="sel-status" id="selStatusBadge">—</span>
+          </div>
+        </div>
+
+        <!-- controle rápido: abrir / fechar / encerrar / novo -->
+        <div class="admin-card">
+          <h3>Controle do seletivo</h3>
+          <p style="color:var(--periwinkle);font-size:.9rem;margin-bottom:16px">
+            Abra as inscrições quando o seletivo começar, feche quando encerrar o prazo,
+            ou encerre de vez para tirar do site. "Criar novo" limpa e começa uma edição nova.
+          </p>
+          <div class="sel-actions">
+            <button class="btn btn-primary btn-small" id="btnAbrirInsc">Abrir inscrições</button>
+            <button class="mini-btn" id="btnFecharInsc">Fechar inscrições</button>
+            <button class="mini-btn danger" id="btnEncerrarSel">Encerrar seletivo</button>
+            <button class="mini-btn" id="btnNovoSel">Criar novo seletivo</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h3>Editar seletivo</h3>
+          <div class="switch-row">
+            <input type="checkbox" id="selAtivo">
+            <label for="selAtivo">Seletivo ativo (aparece no site)</label>
+          </div>
+          <div class="switch-row">
+            <input type="checkbox" id="selAbertas">
+            <label for="selAbertas">Inscrições abertas</label>
+          </div>
+          <div class="form-field">
+            <label for="selTitulo">Título</label>
+            <input type="text" id="selTitulo">
+          </div>
+          <div class="form-field">
+            <label for="selDescricao">Descrição</label>
+            <textarea id="selDescricao" rows="3"></textarea>
+          </div>
+          <h3>Etapas</h3>
+          <div id="etapasList"></div>
+          <button class="mini-btn" id="btnAddEtapa">+ Adicionar etapa</button>
+          <button class="btn btn-primary form-submit" id="btnSalvarSeletivo">Salvar seletivo</button>
+        </div>
+      </section>
+
+      <!-- ----- ABA EQUIPE ----- -->
+      <section class="admin-panel" id="panel-equipe">
+        <div class="panel-head">
+          <h2>Equipe / Conselho Diretor</h2>
+        </div>
+        <div class="admin-card">
+          <h3 id="memberFormTitle">Adicionar membro</h3>
+          <form id="memberForm">
+            <input type="hidden" id="memberIndex" value="">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="memberNome">Nome *</label>
+                <input type="text" id="memberNome" required>
+              </div>
+              <div class="form-field">
+                <label for="memberCargo">Cargo *</label>
+                <input type="text" id="memberCargo" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="memberCurso">Curso *</label>
+              <input type="text" id="memberCurso" required>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="memberFotoUrl">Foto por URL</label>
+                <input type="url" id="memberFotoUrl" placeholder="https://...">
+              </div>
+              <div class="form-field">
+                <label for="memberFotoFile">Ou foto por upload (vira base64)</label>
+                <input type="file" id="memberFotoFile" accept="image/*">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-small">Salvar membro</button>
+            <button type="button" class="mini-btn" id="btnCancelMember" hidden>Cancelar edição</button>
+          </form>
+        </div>
+        <div class="member-grid" id="memberGrid"></div>
+      </section>
+
+      <!-- ----- ABA RANKING / JOGO ----- -->
+      <section class="admin-panel" id="panel-ranking">
+        <div class="panel-head">
+          <h2>Ranking do jogo</h2>
+          <div class="actions">
+            <button class="mini-btn danger" id="btnLimparRanking">Limpar ranking</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <input type="search" id="rankSearch" placeholder="Buscar por nome...">
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table" id="rankTable">
+            <thead>
+              <tr><th>#</th><th>Nome</th><th>Gols</th><th>Data</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="empty-note" id="rankEmpty" hidden>Ninguém no ranking ainda.</div>
+        </div>
+
+        <div class="admin-card" style="margin-top:24px">
+          <h3>Palavras proibidas no ranking</h3>
+          <p style="color:var(--periwinkle);font-size:.9rem;margin-bottom:16px">
+            Nomes que contenham qualquer uma destas palavras são bloqueados na hora de salvar o score.
+          </p>
+          <div class="etapa-row">
+            <input type="text" id="novaPalavra" placeholder="Adicionar palavra proibida...">
+            <button class="mini-btn" id="btnAddPalavra">+ Adicionar</button>
+          </div>
+          <div id="palavroesList" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px"></div>
+        </div>
+      </section>
+
+      <!-- ----- ABA CONTEÚDO ----- -->
+      <section class="admin-panel" id="panel-conteudo">
+        <div class="panel-head">
+          <h2>Conteúdo do site</h2>
+        </div>
+        <div class="admin-card">
+          <h3>Texto "Sobre"</h3>
+          <div class="form-field">
+            <textarea id="contSobre" rows="6"></textarea>
+          </div>
+          <h3>Destaque</h3>
+          <div class="form-field">
+            <input type="text" id="contDestaque">
+          </div>
+          <h3>Números</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="contAnos">Anos de equipe</label>
+              <input type="number" id="contAnos" min="0">
+            </div>
+            <div class="form-field">
+              <label for="contMembros">Membros ativos</label>
+              <input type="number" id="contMembros" min="0">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="contCompeticoes">Competições internacionais</label>
+              <input type="number" id="contCompeticoes" min="0">
+            </div>
+            <div class="form-field">
+              <label for="contPremios">Premiações</label>
+              <input type="number" id="contPremios" min="0">
+            </div>
+          </div>
+          <h3>Patrocinadores (nome + URL do logo)</h3>
+          <div id="patrocList"></div>
+          <button class="mini-btn" id="btnAddPatroc">+ Adicionar patrocinador</button>
+          <button class="btn btn-primary form-submit" id="btnSalvarConteudo">Salvar conteúdo</button>
+        </div>
+
+        <!-- Instagram -->
+        <div class="admin-card">
+          <h3>Instagram (posts reais)</h3>
+          <p style="color:var(--periwinkle);font-size:.9rem;margin-bottom:16px;line-height:1.6">
+            Duas formas de mostrar posts <strong>reais</strong> na página de Contato (sem back-end):<br>
+            <strong>A) Feed ao vivo (recomendado, atualiza sozinho):</strong> crie um widget grátis em
+            <a href="https://behold.so" target="_blank" rel="noopener" style="color:var(--raio)">behold.so</a>,
+            <a href="https://snapwidget.com" target="_blank" rel="noopener" style="color:var(--raio)">snapwidget.com</a> ou
+            <a href="https://lightwidget.com" target="_blank" rel="noopener" style="color:var(--raio)">lightwidget.com</a>,
+            conecte o @edromufu e cole aqui o código de incorporação.<br>
+            <strong>B) Posts avulsos:</strong> cole os links dos posts (um por linha) — usamos o embed oficial do Instagram.
+          </p>
+          <div class="form-field">
+            <label for="instaWidget">A) Código do widget de feed ao vivo</label>
+            <textarea id="instaWidget" rows="4" placeholder="&lt;script&gt;...&lt;/script&gt; ou &lt;iframe&gt;...&lt;/iframe&gt; do Behold/SnapWidget/LightWidget"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="instaPosts">B) Links de posts (um por linha)</label>
+            <textarea id="instaPosts" rows="4" placeholder="https://www.instagram.com/p/XXXXXXXX/&#10;https://www.instagram.com/p/YYYYYYYY/"></textarea>
+          </div>
+          <button class="btn btn-primary form-submit" id="btnSalvarInsta">Salvar Instagram</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

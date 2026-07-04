@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>EDROM — Guia do Painel Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Press+Start+2P&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --indigo:#100F24; --azul:#3D407D; --roxo:#4F4A9E; --raio:#FFD23F;
+    --peri:#9DB4E8; --papel:#F4F3FB; --surface:#191833; --border:rgba(157,180,232,.16);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  @page{ size:A4; margin:0; }
+  html,body{ background:var(--indigo); color:var(--papel); font-family:'Inter',sans-serif; font-size:13px; line-height:1.6; }
+  .page{
+    width:210mm; min-height:297mm; padding:20mm 18mm; position:relative; overflow:hidden;
+    background:
+      radial-gradient(560px circle at 88% 8%, rgba(79,74,158,.28), transparent 60%),
+      radial-gradient(480px circle at 5% 96%, rgba(61,64,125,.30), transparent 60%),
+      var(--indigo);
+    page-break-after:always;
+  }
+  .page:last-child{ page-break-after:auto; }
+  .grid-bg{ position:absolute; inset:0; opacity:.5;
+    background-image:linear-gradient(rgba(157,180,232,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(157,180,232,.05) 1px,transparent 1px);
+    background-size:34px 34px; pointer-events:none; }
+  .content{ position:relative; z-index:1; }
+
+  h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:40px; line-height:1.05; letter-spacing:-.02em; }
+  h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; margin:0 0 10px; letter-spacing:-.01em; }
+  h3{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; margin:0 0 6px; }
+  .hl{ color:var(--raio); }
+  .eyebrow{ font-family:'Press Start 2P',monospace; font-size:9px; letter-spacing:2px; color:var(--raio); text-transform:uppercase; display:inline-flex; align-items:center; gap:10px; }
+  .eyebrow::before{ content:''; width:24px; height:2px; background:var(--raio); }
+  p{ color:#d4d8ee; margin:0 0 8px; }
+  strong{ color:var(--papel); }
+  a{ color:var(--raio); text-decoration:none; }
+  code{ font-family:'Press Start 2P',monospace; font-size:9px; background:rgba(255,210,63,.1); border:1px solid rgba(255,210,63,.28); color:var(--raio); padding:2px 6px; border-radius:5px; }
+
+  /* capa */
+  .cover{ display:flex; flex-direction:column; justify-content:center; min-height:257mm; }
+  .cover .sym{ width:130px; margin-bottom:26px; filter:drop-shadow(0 0 24px rgba(255,210,63,.3)); }
+  .cover h1{ font-size:52px; }
+  .cover .sub{ color:var(--peri); font-size:16px; margin-top:14px; max-width:70%; }
+  .cover .meta{ margin-top:40px; display:flex; gap:14px; flex-wrap:wrap; }
+  .chip{ display:inline-flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:9px 16px; font-size:12px; color:var(--peri); }
+  .chip b{ color:var(--raio); }
+  .cover .foot{ position:absolute; bottom:20mm; left:18mm; right:18mm; display:flex; justify-content:space-between; color:rgba(157,180,232,.6); font-size:11px; border-top:1px solid var(--border); padding-top:12px; }
+
+  /* cards / tabelas */
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin:12px 0; }
+  .card.hot{ border-color:rgba(255,210,63,.4); background:linear-gradient(120deg,rgba(255,210,63,.08),rgba(79,74,158,.14)); }
+  .lead{ color:var(--peri); font-size:13.5px; margin:6px 0 16px; }
+  table{ width:100%; border-collapse:collapse; margin:10px 0; }
+  th{ text-align:left; font-family:'Press Start 2P',monospace; font-size:8px; letter-spacing:1px; color:var(--peri); text-transform:uppercase; padding:8px 10px; border-bottom:1px solid var(--border); }
+  td{ padding:9px 10px; border-bottom:1px solid rgba(157,180,232,.08); vertical-align:top; font-size:12.5px; }
+  td:first-child{ white-space:nowrap; }
+  .tag{ font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--raio); }
+  .step{ display:flex; gap:14px; margin:12px 0; }
+  .step .n{ flex:none; width:30px; height:30px; border-radius:50%; background:var(--raio); color:var(--indigo); font-family:'Space Grotesk',sans-serif; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .note{ background:rgba(255,90,90,.08); border:1px solid rgba(255,90,90,.3); border-radius:12px; padding:12px 16px; margin:12px 0; font-size:12.5px; }
+  .note b{ color:#ff9a9a; }
+  .ok{ background:rgba(80,220,130,.08); border:1px solid rgba(80,220,130,.3); border-radius:12px; padding:12px 16px; margin:12px 0; font-size:12.5px; }
+  .ok b{ color:#50dc82; }
+  .sec-head{ display:flex; align-items:center; gap:14px; margin:0 0 6px; }
+  .sec-num{ font-family:'Press Start 2P',monospace; font-size:14px; color:var(--raio); }
+  .divider{ height:1px; background:var(--border); margin:18px 0; }
+  ul{ margin:6px 0 6px 18px; } li{ margin:4px 0; color:#d4d8ee; }
+</style>
+</head>
+<body>
+
+<!-- ===== CAPA ===== -->
+<section class="page">
+  <div class="grid-bg"></div>
+  <div class="content cover">
+    <img class="sym" src="assets/marca/simbolo-edrom.png" alt="EDROM">
+    <span class="eyebrow">EQUIPE DE DESENVOLVIMENTO EM ROBÓTICA MÓVEL · UFU</span>
+    <h1 style="margin-top:16px;">Guia do<br><span class="hl">Painel Admin</span></h1>
+    <p class="sub">Como gerenciar o site da EDROM sem tocar em código: leads, processo seletivo, equipe, ranking do jogo, conteúdo e backup.</p>
+    <div class="meta">
+      <span class="chip">Acesso: <b>/admin.html</b></span>
+      <span class="chip">Usuário: <b>edrom</b></span>
+      <span class="chip">Senha: <b>edrom2026</b></span>
+    </div>
+  </div>
+  <div class="foot"><span>EDROM — UFU · FEMEC</span><span>Guia do Painel Admin</span></div>
+</section>
+
+<!-- ===== PÁGINA 1: fundamentos ===== -->
+<section class="page">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <span class="eyebrow">COMEÇANDO</span>
+    <h2 style="margin-top:12px;">1. Entrar no painel</h2>
+    <div class="card">
+      <p>Acesse <code>/admin.html</code> (ex.: <strong>seusite.com/admin.html</strong>). A página é oculta — não aparece no menu.</p>
+      <table>
+        <tr><th>Campo</th><th>Valor</th></tr>
+        <tr><td>Usuário</td><td><span class="tag">edrom</span></td></tr>
+        <tr><td>Senha</td><td><span class="tag">edrom2026</span></td></tr>
+      </table>
+      <p style="margin-top:8px;">Para trocar a senha, abra <code>js/admin.js</code> nas primeiras linhas e edite <strong>ADMIN_USER</strong> e <strong>ADMIN_PASS</strong>. O botão <strong>Sair</strong> desloga.</p>
+    </div>
+
+    <div class="note">
+      <b>⚠ Como os dados são salvos.</b> Tudo fica no <strong>navegador</strong> (localStorage), sem servidor. O que você edita <strong>só vale naquele computador/navegador</strong>. Para migrar, use <strong>Exportar / Importar backup</strong>. É por isso também que o ranking do jogo é por navegador, não global.
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>2. Barra superior (sempre visível)</h2>
+    <table>
+      <tr><th>Botão</th><th>O que faz</th></tr>
+      <tr><td><span class="tag">Exportar backup</span></td><td>Baixa um <code>.json</code> com tudo: leads, inscrições, seletivo, equipe, ranking e conteúdo.</td></tr>
+      <tr><td><span class="tag">Importar backup</span></td><td>Restaura de um <code>.json</code> exportado (substitui os dados atuais).</td></tr>
+      <tr><td><span class="tag">Ver site</span></td><td>Abre o site numa aba nova.</td></tr>
+      <tr><td><span class="tag">Sair</span></td><td>Desloga do painel.</td></tr>
+    </table>
+
+    <div class="divider"></div>
+
+    <div class="sec-head"><span class="sec-num">03</span><h2 style="margin:0;">Aba Leads</h2></div>
+    <p class="lead">Contatos coletados pelo chat (robô) do site.</p>
+    <ul>
+      <li><strong>Filtro por tipo:</strong> Patrocínio ou Membro.</li>
+      <li><strong>Busca:</strong> por nome, e-mail, empresa, curso ou área.</li>
+      <li><strong>Exportar CSV:</strong> baixa a lista para Excel / Google Sheets.</li>
+      <li><strong>Excluir:</strong> remove um lead da lista.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>EDROM — UFU · FEMEC</span><span>2 / 5</span></div>
+</section>
+
+<!-- ===== PÁGINA 2: inscrições + seletivo ===== -->
+<section class="page">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="sec-head"><span class="sec-num">04</span><h2 style="margin:0;">Aba Inscrições</h2></div>
+    <p class="lead">Candidatos que se inscreveram no processo seletivo (cada um recebe um código <code>EDROM-0001</code>).</p>
+    <table>
+      <tr><th>Ação</th><th>Efeito</th></tr>
+      <tr><td><span class="tag">Etapa</span></td><td>Muda a etapa do candidato (Inscrição → Desafio → Entrevista → Resultado). <strong>O candidato vê no site</strong>, na aba "Acompanhar inscrição".</td></tr>
+      <tr><td><span class="tag">Status</span></td><td>Em análise / Aprovado / Reprovado / Aguardando.</td></tr>
+      <tr><td><span class="tag">Excluir</span></td><td>Remove a inscrição.</td></tr>
+      <tr><td><span class="tag">Busca</span></td><td>Por nome, código ou e-mail.</td></tr>
+    </table>
+
+    <div class="divider"></div>
+
+    <div class="sec-head"><span class="sec-num">05</span><h2 style="margin:0;">Aba Processo Seletivo</h2></div>
+    <p class="lead">Controle se o seletivo aparece no site e se aceita inscrições. Um selo mostra o status atual.</p>
+    <div class="card hot">
+      <h3>Controle rápido</h3>
+      <table>
+        <tr><th>Botão</th><th>Efeito no site</th></tr>
+        <tr><td><span class="tag">Abrir inscrições</span></td><td>Seletivo ativo e aceitando inscrições (mostra "Inscreva-se").</td></tr>
+        <tr><td><span class="tag">Fechar inscrições</span></td><td>Continua visível, mas sem inscrever ("INSCRIÇÕES FECHADAS").</td></tr>
+        <tr><td><span class="tag">Encerrar seletivo</span></td><td>Some do site. Inscrições antigas continuam salvas.</td></tr>
+        <tr><td><span class="tag">Criar novo</span></td><td>Zera título, descrição e etapas para uma nova edição (começa fechado).</td></tr>
+      </table>
+    </div>
+    <p><strong>Editar seletivo:</strong> ajuste os checkboxes <em>Ativo</em> / <em>Inscrições abertas</em>, o <strong>Título</strong>, a <strong>Descrição</strong> e as <strong>Etapas</strong> (nome + data; "+ Adicionar etapa" e "×"). Clique <strong>Salvar seletivo</strong>.</p>
+    <div class="ok"><b>✓ Estado atual:</b> o seletivo já vem <strong>FECHADO</strong>. Quando a seleção começar, é só clicar <strong>Abrir inscrições</strong>.</div>
+  </div>
+  <div class="foot"><span>EDROM — UFU · FEMEC</span><span>3 / 5</span></div>
+</section>
+
+<!-- ===== PÁGINA 3: equipe + ranking ===== -->
+<section class="page">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="sec-head"><span class="sec-num">06</span><h2 style="margin:0;">Aba Equipe</h2></div>
+    <p class="lead">Atualize o Conselho Diretor sem mexer no código. A seção "Equipe" do site lê exatamente daqui.</p>
+    <ul>
+      <li><strong>Adicionar membro:</strong> Nome, Cargo, Curso + foto por <strong>URL</strong> ou <strong>upload</strong> (o upload vira base64 e fica salvo).</li>
+      <li><strong>Editar:</strong> "Editar" no card preenche o formulário; salve para atualizar.</li>
+      <li><strong>Remover:</strong> tira o membro da equipe.</li>
+    </ul>
+    <div class="card"><p>💡 <strong>Dica:</strong> para usar as fotos locais de backup, no campo "Foto por URL" coloque <code>assets/equipe/pamella.png</code> (e assim por diante).</p></div>
+
+    <div class="divider"></div>
+
+    <div class="sec-head"><span class="sec-num">07</span><h2 style="margin:0;">Aba Ranking / Jogo</h2></div>
+    <p class="lead">Moderação do Jogo do Robô.</p>
+    <ul>
+      <li><strong>Tabela do ranking:</strong> posição, nome, gols e data. <strong>Remover</strong> tira um score (útil se algum nome ofensivo passar).</li>
+      <li><strong>Limpar ranking:</strong> zera tudo (pede confirmação).</li>
+      <li><strong>Palavras proibidas:</strong> lista de bloqueio — nomes com essas palavras não salvam. Já vem com ~56 termos; "Adicionar" inclui, "×" remove.</li>
+    </ul>
+    <div class="card"><p>O filtro entende disfarces com número/símbolo: <code>0→o</code>, <code>@→a</code>, <code>3→e</code>, <code>4→a</code>. Então <strong>otári0</strong> e <strong>c4ralho</strong> são bloqueados.</p></div>
+  </div>
+  <div class="foot"><span>EDROM — UFU · FEMEC</span><span>4 / 5</span></div>
+</section>
+
+<!-- ===== PÁGINA 4: conteúdo + instagram + backup ===== -->
+<section class="page">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="sec-head"><span class="sec-num">08</span><h2 style="margin:0;">Aba Conteúdo</h2></div>
+    <p class="lead">Textos e números do site.</p>
+    <ul>
+      <li><strong>Sobre</strong> e <strong>Destaque</strong> (a faixa "3º lugar CBR 2025").</li>
+      <li><strong>Números</strong> do count-up: Anos, Membros, Competições, Premiações.</li>
+      <li><strong>Patrocinadores:</strong> nome + URL do logo (é o que roda no marquee).</li>
+    </ul>
+
+    <h3 style="margin-top:14px;">Instagram — posts reais</h3>
+    <table>
+      <tr><th>Forma</th><th>Como</th></tr>
+      <tr><td><span class="tag">A) Feed ao vivo</span></td><td>Recomendado (atualiza sozinho). Crie um widget grátis em <strong>behold.so</strong>, <strong>snapwidget.com</strong> ou <strong>lightwidget.com</strong>, conecte o @edromufu e cole o código.</td></tr>
+      <tr><td><span class="tag">B) Posts avulsos</span></td><td>Cole links de posts (um por linha). Usamos o embed oficial do Instagram.</td></tr>
+    </table>
+    <p>Sem nada configurado, ficam os cards-teaser que levam ao perfil. Clique <strong>Salvar Instagram</strong>.</p>
+
+    <div class="divider"></div>
+
+    <div class="sec-head"><span class="sec-num">09</span><h2 style="margin:0;">Backup — não perca os dados</h2></div>
+    <div class="step"><div class="n">1</div><div><strong>Exportar backup</strong> → guarde o arquivo <code>.json</code> em local seguro.</div></div>
+    <div class="step"><div class="n">2</div><div>Em outro PC/navegador → <strong>Importar backup</strong> restaura tudo.</div></div>
+    <div class="step"><div class="n">3</div><div>Limpar o cache/dados do navegador <strong>apaga tudo</strong> — por isso o backup é essencial.</div></div>
+
+    <div class="note" style="margin-top:20px;"><b>Lembre:</b> as fotos da equipe e os logos dos patrocinadores vêm de URLs externas (Wix). Se algum dia saírem do ar, troque no admin pelas versões locais em <code>assets/</code>.</div>
+
+    <div style="margin-top:34px; text-align:center; color:var(--peri); font-size:12px;">
+      <img src="assets/marca/simbolo-edrom.png" style="width:54px; opacity:.9;"><br>
+      <strong style="color:var(--papel);">Robótica que joga futebol sozinha.</strong><br>
+      edromufu@gmail.com · @edromufu
+    </div>
+  </div>
+  <div class="foot"><span>EDROM — UFU · FEMEC</span><span>5 / 5</span></div>
+</section>
+
+</body>
+</html>

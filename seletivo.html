@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Processo Seletivo — EDROM</title>
+  <meta name="description" content="Faça parte da EDROM. Veja o processo seletivo ativo, inscreva-se e acompanhe sua inscrição por um código.">
+  <link rel="icon" type="image/png" href="assets/marca/simbolo-edrom.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Press+Start+2P&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="seletivo">
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow reveal">FAÇA PARTE</span>
+        <h1 class="reveal" data-delay="1">Processo <span class="hl">Seletivo</span>.</h1>
+        <p class="reveal" data-delay="2">Venha desenvolver robôs humanoides que jogam futebol sozinhos. Inscreva-se e acompanhe cada etapa por um código.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight" id="seletivo">
+      <div class="container">
+        <div class="seletivo-card reveal" id="seletivoCard" style="margin-top:0"><!-- via JS (edrom_seletivo) --></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: inscrição -->
+  <div class="modal-backdrop" id="modalInscricao">
+    <div class="modal">
+      <button class="modal-close" data-close-modal aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <h3>Inscrição no seletivo</h3>
+      <p id="inscricaoSubtitle">Preencha seus dados. Você recebe um código para acompanhar sua inscrição.</p>
+      <form id="formInscricao" novalidate>
+        <div class="form-field">
+          <label for="insNome">Nome completo *</label>
+          <input type="text" id="insNome" required>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="insEmail">E-mail *</label>
+            <input type="email" id="insEmail" required>
+          </div>
+          <div class="form-field">
+            <label for="insTelefone">Telefone *</label>
+            <input type="tel" id="insTelefone" placeholder="(34) 99999-9999" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="insCurso">Curso *</label>
+            <input type="text" id="insCurso" required>
+          </div>
+          <div class="form-field">
+            <label for="insPeriodo">Período *</label>
+            <input type="text" id="insPeriodo" placeholder="Ex.: 3º" required>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="insArea">Área desejada *</label>
+          <select id="insArea" required>
+            <option value="">Selecione...</option>
+            <option>Estrutura</option>
+            <option>Elétrica</option>
+            <option>Movimento</option>
+            <option>Visão</option>
+            <option>Behaviour</option>
+            <option>Marketing</option>
+            <option>Finanças</option>
+            <option>RH</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="insPortfolio">Link de portfólio (opcional)</label>
+          <input type="url" id="insPortfolio" placeholder="https://...">
+        </div>
+        <button type="submit" class="btn btn-primary form-submit">Enviar inscrição</button>
+      </form>
+      <div id="inscricaoResult" hidden></div>
+    </div>
+  </div>
+
+  <!-- MODAL: acompanhar -->
+  <div class="modal-backdrop" id="modalAcompanhar">
+    <div class="modal">
+      <button class="modal-close" data-close-modal aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <h3>Acompanhar inscrição</h3>
+      <p>Digite o código da inscrição (ex.: EDROM-0001) ou o e-mail usado.</p>
+      <form id="formAcompanhar" novalidate>
+        <div class="form-field">
+          <label for="trackKey">Código ou e-mail</label>
+          <input type="text" id="trackKey" placeholder="EDROM-0001">
+        </div>
+        <button type="submit" class="btn btn-primary form-submit">Consultar</button>
+      </form>
+      <div id="trackResult"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/seletivo.js"></script>
+</body>
+</html>

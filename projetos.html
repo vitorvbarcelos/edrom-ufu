@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projetos, Artigos & Conquistas — EDROM</title>
+  <meta name="description" content="Produção acadêmica da EDROM: artigos científicos, Team Description Papers e uma trajetória de mais de 25 premiações em robótica.">
+  <link rel="icon" type="image/png" href="assets/marca/simbolo-edrom.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Press+Start+2P&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="projetos">
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow reveal">TRAJETÓRIA & PRODUÇÃO</span>
+        <h1 class="reveal" data-delay="1">Uma história de <span class="hl">pódios</span>.</h1>
+        <p class="reveal" data-delay="2">Mais de 25 premiações em eventos nacionais e internacionais — e a ciência por trás delas, publicada em artigos e Team Description Papers.</p>
+      </div>
+    </section>
+
+    <!-- conquistas -->
+    <section class="section section--tight" id="conquistas">
+      <div class="container">
+        <div class="timeline">
+          <div class="timeline-item reveal">
+            <svg class="t-medal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>
+            <div class="timeline-card">
+              <span class="timeline-year">2008</span>
+              <h3>Fundação da EDROM</h3>
+              <p>Nasce na UFU a Equipe de Desenvolvimento em Robótica Móvel, vinculada à FEMEC, com orientação do Prof. Dr. Rogério Sales Gonçalves.</p>
+            </div>
+          </div>
+          <div class="timeline-item reveal">
+            <svg class="t-medal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <div class="timeline-card">
+              <span class="timeline-year">2008 — HOJE</span>
+              <h3>25+ premiações</h3>
+              <p>Mais de 25 prêmios conquistados em eventos nacionais e internacionais de robótica ao longo da trajetória da equipe.</p>
+            </div>
+          </div>
+          <div class="timeline-item reveal">
+            <svg class="t-medal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <div class="timeline-card">
+              <span class="timeline-year">INTERNACIONAL</span>
+              <h3>5 competições internacionais</h3>
+              <p>Presença em eventos internacionais de robótica, incluindo a RoboCup, disputando a Humanoid Soccer League.</p>
+            </div>
+          </div>
+          <div class="timeline-item reveal">
+            <svg class="t-medal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>
+            <div class="timeline-card">
+              <span class="timeline-year">2025 · DESTAQUE</span>
+              <h3>3º lugar na CBR 2025</h3>
+              <p>Pódio na Competição Brasileira de Robótica, na categoria Humanoid Soccer League — o resultado mais recente da equipe.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- projetos & artigos -->
+    <section class="section" id="projetos">
+      <div class="container">
+        <span class="eyebrow reveal">PRODUÇÃO ACADÊMICA</span>
+        <h2 class="section-title reveal">Projetos & Artigos</h2>
+        <p class="section-lead reveal" data-delay="1">A EDROM publica o que constrói: artigos científicos e Team Description Papers das nossas robôs.</p>
+        <div class="projects-cols">
+          <div class="projects-col reveal">
+            <h3>Artigos</h3>
+            <div id="artigosList"></div>
+          </div>
+          <div class="projects-col reveal" data-delay="1">
+            <h3>Team Description Papers</h3>
+            <div id="tdpsList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>
