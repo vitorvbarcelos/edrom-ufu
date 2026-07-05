@@ -20,8 +20,8 @@
       <p>Área restrita da equipe</p>
       <form id="loginForm">
         <div class="form-field">
-          <label for="loginUser">Usuário</label>
-          <input type="text" id="loginUser" autocomplete="username">
+          <label for="loginUser">E-mail (Supabase) ou usuário local</label>
+          <input type="text" id="loginUser" autocomplete="username" placeholder="voce@email.com">
         </div>
         <div class="form-field">
           <label for="loginPass">Senha</label>
@@ -38,6 +38,7 @@
     <div class="admin-topbar">
       <img src="assets/marca/edrom-horizontal.png" alt="EDROM">
       <div class="right">
+        <span class="modo-badge off" id="modoBadge" title="">● Modo local</span>
         <button class="mini-btn" id="btnExportBackup">Exportar backup</button>
         <button class="mini-btn" id="btnImportBackup">Importar backup</button>
         <input type="file" id="importFile" accept="application/json" hidden>

@@ -14,9 +14,9 @@
   const modalAcompanhar = document.getElementById('modalAcompanhar');
 
   /* ---------- render da seção ---------- */
-  function renderSeletivo() {
+  async function renderSeletivo() {
     if (!card) return;
-    const s = EdromData.getSeletivo();
+    const s = await EdromData.getSeletivoGlobal();
 
     if (!s.ativo) {
       card.innerHTML = `

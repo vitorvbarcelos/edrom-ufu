@@ -154,6 +154,14 @@ body.admin-body {
 .member-admin-card p { color: var(--periwinkle); font-size: 0.78rem; }
 .member-admin-card .row-actions { display: flex; flex-direction: column; gap: 6px; }
 
+/* selo de modo (global x local) */
+.modo-badge {
+  font-family: var(--font-pixel); font-size: 8px; letter-spacing: 1px;
+  padding: 7px 12px; border-radius: 999px; white-space: nowrap;
+}
+.modo-badge.on  { background: rgba(80, 220, 130, 0.15); color: #50dc82; }
+.modo-badge.off { background: rgba(255, 210, 63, 0.14); color: var(--raio); }
+
 /* controle do seletivo */
 .sel-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .sel-status {

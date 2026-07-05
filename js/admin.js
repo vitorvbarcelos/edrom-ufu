@@ -24,27 +24,54 @@
     return sessionStorage.getItem('admin_logged_in') === 'true';
   }
 
+  // atualiza o selo de status (Global x Local)
+  function updateModoBadge() {
+    const el = document.getElementById('modoBadge');
+    if (!el) return;
+    const global = window.EdromSB && window.EdromSB.isAuthed();
+    el.textContent = global ? '● Global (Supabase)' : '● Modo local';
+    el.className = 'modo-badge ' + (global ? 'on' : 'off');
+    el.title = global
+      ? 'Você está logado no Supabase: edições valem para TODOS os visitantes.'
+      : 'Modo local: edições ficam só neste navegador. Faça login com e-mail (Supabase) para salvar para todos.';
+  }
+
   function showPanel() {
     loginWrap.style.display = 'none';
     adminShell.classList.add('is-logged');
+    updateModoBadge();
     renderAll();
   }
 
-  loginForm.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const u = document.getElementById('loginUser').value.trim();
     const p = document.getElementById('loginPass').value;
+    loginError.classList.remove('show');
+
+    // 1) tenta login GLOBAL no Supabase (e-mail + senha) -> edições valem pra todos
+    if (window.EdromSB && u.includes('@')) {
+      const res = await window.EdromSB.signIn(u, p);
+      if (res.ok) {
+        sessionStorage.setItem('admin_logged_in', 'true');
+        showPanel();
+        showToast('Conectado ao Supabase — edições valem para todos.');
+        return;
+      }
+    }
+    // 2) fallback LOCAL (usuário/senha fixos) -> edita só neste navegador
     if (u === ADMIN_USER && p === ADMIN_PASS) {
       sessionStorage.setItem('admin_logged_in', 'true');
-      loginError.classList.remove('show');
       showPanel();
     } else {
+      loginError.textContent = 'Login inválido. Use o e-mail/senha do Supabase (global) ou o usuário local.';
       loginError.classList.add('show');
     }
   });
 
-  document.getElementById('btnLogout').addEventListener('click', () => {
+  document.getElementById('btnLogout').addEventListener('click', async () => {
     sessionStorage.removeItem('admin_logged_in');
+    if (window.EdromSB) await window.EdromSB.signOut();
     location.reload();
   });
 
@@ -229,8 +256,14 @@
     return row;
   }
 
-  function renderSeletivoForm() {
-    const s = EdromData.getSeletivo();
+  // feedback padrão de salvamento global x local
+  function feedbackSalvo(res, okMsg) {
+    if (res && res.ok) showToast(okMsg + ' — vale pra todos.');
+    else showToast('Salvo só neste navegador. Faça login com e-mail (Supabase) pra valer pra todos.');
+  }
+
+  async function renderSeletivoForm() {
+    const s = await EdromData.getSeletivoGlobal();
     document.getElementById('selAtivo').checked = !!s.ativo;
     document.getElementById('selAbertas').checked = !!s.inscricoesAbertas;
     document.getElementById('selTitulo').value = s.titulo || '';
@@ -245,11 +278,11 @@
   }
 
   // atalhos abrir / fechar / encerrar / novo
-  function patchSeletivo(patch, msg) {
-    EdromData.setSeletivo({ ...EdromData.getSeletivo(), ...patch });
-    renderSeletivoForm();
+  async function patchSeletivo(patch, msg) {
+    const res = await EdromData.setSeletivoGlobal({ ...EdromData.getSeletivo(), ...patch });
+    await renderSeletivoForm();
     renderInscricoes();
-    showToast(msg);
+    feedbackSalvo(res, msg);
   }
   document.getElementById('btnAbrirInsc').addEventListener('click', () =>
     patchSeletivo({ ativo: true, inscricoesAbertas: true }, 'Inscrições ABERTAS. O site já reflete.'));
@@ -259,9 +292,9 @@
     if (!confirm('Encerrar o seletivo? Ele deixa de aparecer no site (as inscrições já feitas continuam salvas).')) return;
     patchSeletivo({ ativo: false, inscricoesAbertas: false }, 'Seletivo encerrado.');
   });
-  document.getElementById('btnNovoSel').addEventListener('click', () => {
+  document.getElementById('btnNovoSel').addEventListener('click', async () => {
     if (!confirm('Criar um novo seletivo? Isso substitui o título, a descrição e as etapas atuais por um modelo em branco (as inscrições já feitas continuam salvas).')) return;
-    EdromData.setSeletivo({
+    const res = await EdromData.setSeletivoGlobal({
       ativo: true, inscricoesAbertas: false,
       titulo: 'Novo Processo Seletivo EDROM',
       descricao: '',
@@ -272,21 +305,21 @@
         { nome: 'Resultado', data: '' },
       ],
     });
-    renderSeletivoForm();
-    showToast('Novo seletivo criado (fechado). Edite e depois abra as inscrições.');
+    await renderSeletivoForm();
+    feedbackSalvo(res, 'Novo seletivo criado (fechado)');
   });
 
   document.getElementById('btnAddEtapa').addEventListener('click', () => {
     etapasList.appendChild(etapaRow());
   });
 
-  document.getElementById('btnSalvarSeletivo').addEventListener('click', () => {
+  document.getElementById('btnSalvarSeletivo').addEventListener('click', async () => {
     const etapas = Array.from(etapasList.querySelectorAll('.etapa-row')).map(row => ({
       nome: row.querySelector('.etapa-nome').value.trim(),
       data: row.querySelector('.etapa-data').value.trim(),
     })).filter(e => e.nome);
 
-    EdromData.setSeletivo({
+    const res = await EdromData.setSeletivoGlobal({
       ativo: document.getElementById('selAtivo').checked,
       inscricoesAbertas: document.getElementById('selAbertas').checked,
       titulo: document.getElementById('selTitulo').value.trim(),
@@ -294,7 +327,7 @@
       etapas,
     });
     renderInscricoes(); // etapas podem ter mudado de nome/quantidade
-    showToast('Seletivo salvo. O site já reflete a mudança.');
+    feedbackSalvo(res, 'Seletivo salvo');
   });
 
   /* ============================================================
@@ -314,8 +347,8 @@
     reader.readAsDataURL(file);
   });
 
-  function renderTeamAdmin() {
-    const team = EdromData.getTeam();
+  async function renderTeamAdmin() {
+    const team = await EdromData.getTeamGlobal();
     memberGrid.innerHTML = team.map((m, i) => `
       <div class="member-admin-card">
         <img src="${esc(m.foto) || 'assets/marca/simbolo-edrom.png'}" alt=""
@@ -346,14 +379,14 @@
       });
     });
     memberGrid.querySelectorAll('[data-remove]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const team = EdromData.getTeam();
         const m = team[parseInt(btn.dataset.remove, 10)];
         if (!confirm(`Remover "${m.nome}" da equipe?`)) return;
         team.splice(parseInt(btn.dataset.remove, 10), 1);
-        EdromData.setTeam(team);
-        renderTeamAdmin();
-        showToast('Membro removido.');
+        const res = await EdromData.setTeamGlobal(team);
+        await renderTeamAdmin();
+        feedbackSalvo(res, 'Membro removido');
       });
     });
   }
@@ -368,7 +401,7 @@
 
   document.getElementById('btnCancelMember').addEventListener('click', resetMemberForm);
 
-  memberForm.addEventListener('submit', (e) => {
+  memberForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const nome = document.getElementById('memberNome').value.trim();
     const cargo = document.getElementById('memberCargo').value.trim();
@@ -381,16 +414,13 @@
 
     const team = EdromData.getTeam();
     const idx = document.getElementById('memberIndex').value;
-    if (idx === '') {
-      team.push({ nome, cargo, curso, foto });
-      showToast('Membro adicionado.');
-    } else {
-      team[parseInt(idx, 10)] = { nome, cargo, curso, foto };
-      showToast('Membro atualizado.');
-    }
-    EdromData.setTeam(team);
+    const msg = idx === '' ? 'Membro adicionado' : 'Membro atualizado';
+    if (idx === '') team.push({ nome, cargo, curso, foto });
+    else team[parseInt(idx, 10)] = { nome, cargo, curso, foto };
+    const res = await EdromData.setTeamGlobal(team);
     resetMemberForm();
-    renderTeamAdmin();
+    await renderTeamAdmin();
+    feedbackSalvo(res, msg);
   });
 
   /* ============================================================
@@ -485,8 +515,8 @@
     return row;
   }
 
-  function renderConteudoForm() {
-    const c = EdromData.getConteudo();
+  async function renderConteudoForm() {
+    const c = await EdromData.getConteudoGlobal();
     document.getElementById('contSobre').value = c.sobre || '';
     document.getElementById('contDestaque').value = c.destaque || '';
     document.getElementById('contAnos').value = c.stats?.anos ?? 0;
@@ -512,7 +542,7 @@
     patrocList.appendChild(patrocRow());
   });
 
-  document.getElementById('btnSalvarConteudo').addEventListener('click', () => {
+  document.getElementById('btnSalvarConteudo').addEventListener('click', async () => {
     const c = EdromData.getConteudo();
     c.sobre = document.getElementById('contSobre').value.trim();
     c.destaque = document.getElementById('contDestaque').value.trim();
@@ -526,8 +556,8 @@
       nome: row.querySelector('.patroc-nome').value.trim(),
       logo: row.querySelector('.patroc-logo').value.trim(),
     })).filter(p => p.nome);
-    EdromData.setConteudo(c);
-    showToast('Conteúdo salvo. O site já reflete a mudança.');
+    const res = await EdromData.setConteudoGlobal(c);
+    feedbackSalvo(res, 'Conteúdo salvo');
   });
 
   /* ============================================================
@@ -570,11 +600,12 @@
   function renderAll() {
     renderLeads();
     renderInscricoes();
-    renderSeletivoForm();
-    renderTeamAdmin();
+    renderSeletivoForm();      // async — carrega do Supabase se logado
+    renderTeamAdmin();         // async
     renderRankingAdmin();
     renderPalavroes();
-    renderConteudoForm();
+    renderConteudoForm();      // async
+    updateModoBadge();
   }
 
   // Sessão já autenticada (ex.: recarregou a página) — abre o painel direto.

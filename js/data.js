@@ -237,6 +237,67 @@ const EdromData = (() => {
     return getRanking(); // offline / tabela ainda não criada
   }
 
+  /* ============================================================
+     GLOBAL (Supabase): equipe, conteúdo e seletivo valem pra TODOS.
+     Leitura cai no localStorage/seed se o backend não responder.
+     Escrita exige admin logado (Supabase Auth) — RLS bloqueia anon.
+     Toda leitura global também atualiza o cache local (pros getters sync).
+     ============================================================ */
+
+  const SB = () => window.EdromSB;
+
+  // --- Equipe ---
+  async function getTeamGlobal() {
+    if (SB()) {
+      const rows = await SB().select('team', 'select=nome,cargo,curso,foto,ordem&order=ordem.asc');
+      if (rows && Array.isArray(rows) && rows.length) {
+        const list = rows.map(r => ({ nome: r.nome, cargo: r.cargo, curso: r.curso, foto: r.foto || '' }));
+        write('edrom_team', list); // cache
+        return list;
+      }
+    }
+    return getTeam();
+  }
+  // substitui a equipe inteira no Supabase (admin logado)
+  async function setTeamGlobal(list) {
+    setTeam(list); // cache local sempre
+    if (!SB() || !SB().isAuthed()) return { ok: false, motivo: 'login' };
+    await SB().remove('team', 'id=gt.0'); // limpa
+    const rows = list.map((m, i) => ({ nome: m.nome, cargo: m.cargo || null, curso: m.curso || null, foto: m.foto || null, ordem: i }));
+    const res = rows.length ? await SB().insert('team', rows) : true;
+    return { ok: res !== null };
+  }
+
+  // --- Conteúdo ---
+  async function getConteudoGlobal() {
+    if (SB()) {
+      const rows = await SB().select('site_config', "select=value&key=eq.conteudo");
+      if (rows && rows[0] && rows[0].value) { write('edrom_conteudo', rows[0].value); return rows[0].value; }
+    }
+    return getConteudo();
+  }
+  async function setConteudoGlobal(obj) {
+    setConteudo(obj);
+    if (!SB() || !SB().isAuthed()) return { ok: false, motivo: 'login' };
+    const res = await SB().upsert('site_config', { key: 'conteudo', value: obj, updated_at: new Date().toISOString() }, 'key');
+    return { ok: res !== null };
+  }
+
+  // --- Seletivo ---
+  async function getSeletivoGlobal() {
+    if (SB()) {
+      const rows = await SB().select('site_config', "select=value&key=eq.seletivo");
+      if (rows && rows[0] && rows[0].value) { write('edrom_seletivo', rows[0].value); return rows[0].value; }
+    }
+    return getSeletivo();
+  }
+  async function setSeletivoGlobal(obj) {
+    setSeletivo(obj);
+    if (!SB() || !SB().isAuthed()) return { ok: false, motivo: 'login' };
+    const res = await SB().upsert('site_config', { key: 'seletivo', value: obj, updated_at: new Date().toISOString() }, 'key');
+    return { ok: res !== null };
+  }
+
   /* ---------- Instagram ---------- */
   // Duas formas de mostrar posts REAIS (sem back-end):
   //  1) lista de URLs de posts -> embed oficial do Instagram
@@ -271,6 +332,9 @@ const EdromData = (() => {
     getLeads, addLead, setLeads,
     getInscricoes, setInscricoes, addInscricao, findInscricao,
     getRanking, setRanking, addScore, getRankingGlobal,
+    getTeamGlobal, setTeamGlobal,
+    getConteudoGlobal, setConteudoGlobal,
+    getSeletivoGlobal, setSeletivoGlobal,
     getPalavroes, setPalavroes, nomePermitido,
     getInstaPosts, setInstaPosts, getInstaWidget, setInstaWidget,
     exportBackup, importBackup,

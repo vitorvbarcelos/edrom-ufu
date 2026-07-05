@@ -15,8 +15,8 @@
      ============================================================ */
 
   // --- Sobre + destaque ---
-  function renderConteudo() {
-    const c = EdromData.getConteudo();
+  async function renderConteudo() {
+    const c = await EdromData.getConteudoGlobal();
     const sobreEl = document.getElementById('sobreTexto');
     const destaqueEl = document.getElementById('sobreDestaque');
     if (sobreEl) sobreEl.textContent = c.sobre;
@@ -33,13 +33,14 @@
       const el = document.getElementById(id);
       if (el) el.dataset.target = val;
     });
+    initCountUp(); // só depois dos números (async) chegarem
   }
 
   // --- Equipe (edrom_team) ---
-  function renderTeam() {
+  async function renderTeam() {
     const grid = document.getElementById('teamGrid');
     if (!grid) return;
-    const team = EdromData.getTeam();
+    const team = await EdromData.getTeamGlobal();
     grid.innerHTML = team.map((m, i) => `
       <article class="team-card reveal" data-delay="${i % 4}">
         <div class="team-photo">
@@ -53,6 +54,7 @@
         </div>
       </article>
     `).join('');
+    revealScan(grid); // cards injetados async precisam ser observados
   }
 
   // --- Projetos & artigos (conteúdo fixo com links reais) ---
@@ -88,8 +90,8 @@
   }
 
   // --- Patrocinadores (edrom_conteudo.patrocinadores) ---
-  function renderSponsors() {
-    const list = EdromData.getConteudo().patrocinadores || [];
+  async function renderSponsors() {
+    const list = (await EdromData.getConteudoGlobal()).patrocinadores || [];
 
     // grid (página de patrocínio)
     const grid = document.getElementById('sponsorLogos');
@@ -229,19 +231,24 @@
   }
 
   // --- Scroll reveal (IntersectionObserver) ---
+  let revealIO = null;
   function initReveals() {
-    const els = document.querySelectorAll('.reveal');
-    if (reducedMotion) { els.forEach(el => el.classList.add('is-visible')); return; }
-    const io = new IntersectionObserver((entries) => {
+    if (reducedMotion) { revealScan = (root = document) => root.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible')); revealScan(); return; }
+    revealIO = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          io.unobserve(entry.target);
+          revealIO.unobserve(entry.target);
         }
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    els.forEach(el => io.observe(el));
+    revealScan();
   }
+  // observa reveals (inclusive os injetados depois, ex.: cards da equipe async)
+  let revealScan = (root = document) => {
+    if (!revealIO) return;
+    root.querySelectorAll('.reveal:not(.is-visible)').forEach(el => revealIO.observe(el));
+  };
 
   // --- Count-up dos números ---
   function initCountUp() {
@@ -401,7 +408,6 @@
     initParallax();
     initHeroMouse();
     initReveals();
-    initCountUp();
     initCursor();
     initMagnetic();
     initRipple();
